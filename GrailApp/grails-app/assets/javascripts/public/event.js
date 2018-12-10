@@ -8,7 +8,6 @@ let evtSource;
 let $sseStartBtn
 let $sseStopBtn
 let $eventList
-let $
 $(function () {
 
     registerHandler();

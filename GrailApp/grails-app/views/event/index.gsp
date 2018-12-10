@@ -5,7 +5,7 @@
 
     <script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
 
-    <asset:javascript src="public/event.js"/>
+
 
     <title> SSE event example</title>
 </head>
@@ -94,5 +94,7 @@
     </div>
 
 
+<asset:javascript src="application.js"/>
+<asset:javascript src="public/event.js"/>
 </body>
 </html>
