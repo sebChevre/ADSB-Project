@@ -8,6 +8,9 @@ let evtSource;
 let $sseStartBtn
 let $sseStopBtn
 let $eventList
+let $sseUriLabel
+const SSE_URI = "/SSE/sse"
+
 $(function () {
 
     registerHandler();
@@ -15,36 +18,41 @@ $(function () {
     $eventList = $('#eventList');
     $sseStartBtn = $('#sse-start');
     $sseStopBtn = $('#sse-stop').hide();
+    $sseUriLabel = $('#sse-uri').hide();
+
 
     $sseStopBtn.on('click', function () {
         evtSource.close();
         $sseStopBtn.hide();
+        $sseUriLabel.hide();
+
     });
 
+    //Start sse streming listenning
     $sseStartBtn.on('click', function () {
 
+        evtSource = new EventSource(SSE_URI);
+
         $sseStopBtn.show();
+        $eventList.children().remove()
 
+        evtSource.onopen = function (e) {
+            console.log('***** Event Source connection Open on url: ' + e.target.url + ' *****')
+            $sseUriLabel.html(e.target.url).show()
+        }
 
-        evtSource = new EventSource("/SSE/index");
-
-        evtSource.addEventListener("tick", function (e) {
+        evtSource.addEventListener("sse-test", function (e) {
             console.log(e)
 
-            var datStr = "data: " + e.data + ", id: " + e.lastEventId;
+            var datStr = "data: " + e.data + ", id: " + e.lastEventId + ", event: " + e.type;
 
             var elem = $('<li class="list-group-item">' + datStr + '</li>')
 
-           // var newElement =  $('<li>', {
-              //  "class": 'list-group-item',
-              //  html: "data: " + e.data + ", id: " + e.lastEventId
-           // })
-           // var newElement = document.createElement("li");
-            //newElement.
-
             console.log(e)
 
-           $eventList.prepend(elem);
+            addEventToList(elem)
+
+            console.log($eventList.children().length)
         })
 
 
@@ -64,7 +72,14 @@ $(function () {
     });
 })
 
+function addEventToList (element) {
 
+    if($eventList.children().length === 10){
+        $eventList.find('li:last-child').remove()
+    }
+    $eventList.prepend(element);
+
+}
 
 
 function increment() {
@@ -75,9 +90,10 @@ function increment() {
 function registerHandler() {
     eventBus = new EventBus('http://localhost:9999/eb');
 
-    eventBus.onopen = function () {
+    eventBus.onopen = function (e) {
 
-        console.log("open")
+        console.log("Vertx EventBus connection open with SockJS")
+        console.log(e)
 
         eventBus.registerHandler('out', function (error, message) {
             console.log(error)

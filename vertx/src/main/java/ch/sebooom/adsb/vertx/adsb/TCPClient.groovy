@@ -23,7 +23,7 @@ class TCPClient extends AbstractVerticle {
         def client = vertx.createNetClient(options)
 
 
-        client.connect(30003, "192.168.1.253",{ res ->
+        client.connect(30003, "raspberrypi",{ res ->
 
             if (res.succeeded()) {
                 logger.info "Connected!";

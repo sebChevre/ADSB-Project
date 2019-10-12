@@ -1,38 +1,47 @@
 package grailapp
 
+import org.grails.web.json.JSONObject
 import rx.Observer
 import grails.rx.web.RxController
 import groovy.transform.CompileStatic
 
+import java.text.SimpleDateFormat
+
 @CompileStatic
 class SSEController implements RxController{
 
-    def index() {
+    def sse() {
 
         rx.stream { Observer observer ->
 
-            def date = new Date()
 
-            for(i in (0..5)) {
-                if(i % 2 == 0) {
 
+            def msg = new JSONObject().put("date",new Date().toInstant()).toString()
+            def msgCpt = 0
+
+            try{
+                while(true) {
 
 
                     observer.onNext(
-                            rx.event("message, le $date",id: i, event: 'tick', comment: 'tick')
-                    )
-                }
-                else {
-                    observer.onNext(
-                            rx.event("ok boy",id: i, event: 'tick', comment: 'tick')
+                            rx.event("msg: $msg", id: "$msgCpt", event: "sse-test")
                     )
 
+                    sleep 1000
+                    msgCpt ++
+
                 }
-                sleep 1000
+
+                observer.onCompleted()
+            }catch(Exception e){
+                observer.onError(e)
+                log.warn("Client SSE connection error : " + e)
             }
 
 
-            observer.onCompleted()
+
+
+
         }
     }
 }
