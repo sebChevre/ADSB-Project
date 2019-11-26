@@ -46,8 +46,8 @@ public class TCPToSBS1Configuration {
     public static final String MSG_CHANNEL_NAME = "msgChannel";
     public static final String NON_MSG_CHANNEL_NAME = "nonMsgChannel";
     public static final String NON_MSG_JSON_CHANNEL_NAME = "nonMsgJsonChannel";
-    private final String TCP_HOST ="Raspberrypi.local";
-    private final int TCP_PORT = 30003;
+    private final String TCP_HOST = "localhost";//""Raspberrypi.local";
+    private final int TCP_PORT = 1234;//30003;
 
     private final static String TCP_OUT_CHANNEL_NAME = "sbs1RawChannel";
 

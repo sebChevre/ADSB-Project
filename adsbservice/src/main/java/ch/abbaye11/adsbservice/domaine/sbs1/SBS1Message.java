@@ -54,44 +54,45 @@ public class SBS1Message {
 
     private SBS1Message addDatesField(String generatedDate,String loggedDate,String generatedTime,String loggedTime)  {
 
+        if(!generatedDate.isEmpty()){
+            LocalDate logDate = LocalDate.parse(loggedDate.replace("/","-"));
+            LocalTime logTime = LocalTime.parse(loggedTime);
+
+            LocalDateTime logDateTime = LocalDateTime.of(logDate,logTime);
+
+            ZonedDateTime zd = ZonedDateTime.of(logDateTime,ZoneOffset.UTC);
 
 
-
-        LocalDate logDate = LocalDate.parse(loggedDate.replace("/","-"));
-        LocalTime logTime = LocalTime.parse(loggedTime);
-
-        LocalDateTime logDateTime = LocalDateTime.of(logDate,logTime);
-
-        ZonedDateTime zd = ZonedDateTime.of(logDateTime,ZoneOffset.UTC);
+            LocalDateTime lt  = zd.toLocalDateTime();
+            lt.atZone(ZoneOffset.ofHours(2));
 
 
-        LocalDateTime lt  = zd.toLocalDateTime();
-        lt.atZone(ZoneOffset.ofHours(2));
+            Date date= null;
+            try {
+                date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").parse(loggedDate + " " + loggedTime);
 
+            } catch (ParseException e) {
+                throw new SBS1MessageException(e.getMessage());
+            }
 
-        Date date= null;
-        try {
-            date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").parse(loggedDate + " " + loggedTime);
+            this.loggedDate = date;
 
-        } catch (ParseException e) {
-            throw new SBS1MessageException(e.getMessage());
+            LocalDate genDate = LocalDate.parse(generatedDate.replace("/","-"));
+            LocalTime genTime = LocalTime.parse(generatedTime);
+
+            this.generatedDate = LocalDateTime.of(logDate,logTime);
+
+        }else{
+            this.generatedDate = null;
         }
 
-        this.loggedDate = date;
-
-
-
-        LocalDate genDate = LocalDate.parse(generatedDate.replace("/","-"));
-        LocalTime genTime = LocalTime.parse(generatedTime);
-
-        this.generatedDate = LocalDateTime.of(logDate,logTime);
 
         return this;
     }
 
     public static SBS1Message getInstanceFromRawMessage(final String rawMessage)  {
 
-        String[] sbs1Elements = rawMessage.split(",");
+        String[] sbs1Elements = rawMessage.split(",",-1);
 
         SBS1MessageType messageType = SBS1MessageType.fromString(sbs1Elements[0]);
         String transmissionType = sbs1Elements[1];
@@ -107,6 +108,8 @@ public class SBS1Message {
         String loggedTime = sbs1Elements[9];
 
         String callsign = sbs1Elements[10];
+
+
         String altitude = sbs1Elements[11];
         String groundSpeed = sbs1Elements[12];
         String track = sbs1Elements[13];

@@ -9,11 +9,11 @@
         </encoder>
     </appender>
 
-    <logger name="ch.abbaye11.adsbservice.infrastructure.TCPToSBS1Configuration" level="info">
+    <logger name="ch.abbaye11.adsbservice.infrastructure.TCPToSBS1Configuration" level="debug">
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
     </root>
 

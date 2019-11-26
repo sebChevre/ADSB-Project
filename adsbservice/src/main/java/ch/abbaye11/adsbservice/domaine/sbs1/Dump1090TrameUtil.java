@@ -14,13 +14,16 @@ public class Dump1090TrameUtil {
 
             if(tcpTrame.isEmpty()) throw new IllegalArgumentException("Trame cannot be empty");
 
-            if(tcpTrame.split(",",-1).length < 10) throw new TcpTrameEception("The tokenized chain dont containss enough token");
+            if(tcpTrame.split(",",-1).length < 10) throw new TcpTrameEception("The tokenized chain dont contains enough token");
 
             SBS1MessageType sbs1MessageType = Arrays.stream(SBS1MessageType.values()).filter(messageType -> {
                 return tcpTrame.split(",")[0].equals(messageType.toString());
             }).findFirst().orElseThrow(()->
                     new TcpTrameEception("Cannot find message type correlation : " + tcpTrame.split(",",-1)[0]));
 
+           if(!sbs1MessageType.equals(SBS1MessageType.MSG)){
+                return false;
+            }
         }catch (Exception e) {
 
             return false;
