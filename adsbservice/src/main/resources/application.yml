@@ -4,9 +4,16 @@ adsb:
             host: localhost
             port: 1234
 
+mongodb:
+    host: localhost
+    port: 27017
+    database: adsb
+    collection: message-11
+
 spring:
     profiles:
         active: file
 
     kafka:
         bootstrap-servers: localhost:9092
+        topic: test-22
