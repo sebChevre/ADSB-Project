@@ -152,7 +152,7 @@ public class TCPToSBS1Configuration {
 
     @Bean
     @ServiceActivator(inputChannel = SBS_1_CHANNEL_NAME)
-    public MessageHandler kafkaMessageHandler() {
+    public MessageHandler publishToKafka() {
         KafkaProducerMessageHandler handler = new KafkaProducerMessageHandler(kafkaTemplate());
         handler.setTopicExpression(new LiteralExpression("test-adsb"));
         handler.setMessageKeyExpression(new LiteralExpression("kafka-integration"));
