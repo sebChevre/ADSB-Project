@@ -35,6 +35,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static ch.abbaye11.adsbservice.domaine.sbs1.SBS1MessageType.MSG;
+
 @Configuration
 @EnableIntegration
 @Slf4j
@@ -46,6 +48,7 @@ public class TCPToSBS1Configuration {
     public static final String MSG_CHANNEL_NAME = "msgChannel";
     public static final String NON_MSG_CHANNEL_NAME = "nonMsgChannel";
     public static final String NON_MSG_JSON_CHANNEL_NAME = "nonMsgJsonChannel";
+    private static final String MSG_JSON_CHANNEL_NAME = "msgJsonChannel";
     private final String TCP_HOST = "localhost";//""Raspberrypi.local";
     private final int TCP_PORT = 1234;//30003;
 
@@ -121,7 +124,7 @@ public class TCPToSBS1Configuration {
     @Router(inputChannel = SBS_1_CHANNEL_NAME)
     public String routeByMessageType (SBS1Message message){
 
-        if(message.getMessageType().equals(SBS1MessageType.MSG)){
+        if(message.getMessageType().equals(MSG)){
             return MSG_CHANNEL_NAME;
         }else{
             return NON_MSG_CHANNEL_NAME;
@@ -158,7 +161,7 @@ public class TCPToSBS1Configuration {
     }
 
 
-    @Transformer(inputChannel = MSG_CHANNEL_NAME,outputChannel = NON_MSG_JSON_CHANNEL_NAME)
+    @Transformer(inputChannel = MSG_CHANNEL_NAME,outputChannel = MSG_JSON_CHANNEL_NAME)
     public String convertJsonToString(Message message) throws JsonProcessingException {
         assert message.getPayload() instanceof SBS1Message;
         log.info("[transformer][msg, msgJson][payload=SMS1Message]");
@@ -174,7 +177,7 @@ public class TCPToSBS1Configuration {
 
     @Profile("file")
     @Bean
-    @ServiceActivator(inputChannel= NON_MSG_JSON_CHANNEL_NAME)
+    @ServiceActivator(inputChannel= MSG_JSON_CHANNEL_NAME)
     public MessageHandler fileWritingHandler() {
 
 

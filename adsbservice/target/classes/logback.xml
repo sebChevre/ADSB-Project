@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <logger name="ch.abbaye11.adsbservice.infrastructure.TCPToSBS1Configuration" level="debug">
+    <logger name="ch.abbaye11.adsbservice.infrastructure.TCPToSBS1Configuration" level="info">
         <appender-ref ref="STDOUT"/>
     </logger>
 

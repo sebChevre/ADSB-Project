@@ -3,10 +3,13 @@ package ch.abbaye11.adsbservice.domaine.sbs1;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.Date;
+
+import static ch.abbaye11.adsbservice.domaine.sbs1.SBS1MessageType.*;
 
 @Getter
 @ToString
@@ -93,8 +96,43 @@ public class SBS1Message {
     public static SBS1Message getInstanceFromRawMessage(final String rawMessage)  {
 
         String[] sbs1Elements = rawMessage.split(",",-1);
+        SBS1MessageType messageType = fromString(sbs1Elements[0]);
 
-        SBS1MessageType messageType = SBS1MessageType.fromString(sbs1Elements[0]);
+        switch (messageType){
+            case MSG: return dealMsgMessage(rawMessage,messageType,sbs1Elements);
+
+            default: return mapNonMsgMessage(rawMessage,messageType,sbs1Elements);
+        }
+    }
+
+    private static SBS1Message mapNonMsgMessage(String rawMessage,SBS1MessageType messageType, String[] sbs1Elements){
+
+        //String transmissionType = sbs1Elements[1];
+
+        String sessionId = sbs1Elements[2];
+        String aircraftId = sbs1Elements[3];
+        String hexIdent = sbs1Elements[4];
+        String flightId = sbs1Elements[5];
+
+        String generatedDate = sbs1Elements[6];
+        String generatedTime = sbs1Elements[7];
+        String loggedDate = sbs1Elements[8];
+        String loggedTime = sbs1Elements[9];
+
+        if(messageType.equals(ID) || messageType.equals(SEL) || messageType.equals(STA) ){
+            String callsign = sbs1Elements[10];
+        }
+
+        return new SBS1Message(rawMessage,messageType,null)
+                .addIdentitiesField(sessionId,aircraftId,hexIdent,flightId)
+                .addDatesField(generatedDate,loggedDate,generatedTime,loggedTime);
+              //  .addCoordinates(latitude,longitude)
+              //  .addFlightData(callsign,altitude,groundSpeed,track)
+              //  .addLastElements(verticalRate,squawk,alert,spi,isOnGround);
+
+    }
+
+    private static SBS1Message dealMsgMessage(String rawMessage,SBS1MessageType messageType, String[] sbs1Elements) {
         String transmissionType = sbs1Elements[1];
 
         String sessionId = sbs1Elements[2];
@@ -132,7 +170,6 @@ public class SBS1Message {
                 .addCoordinates(latitude,longitude)
                 .addFlightData(callsign,altitude,groundSpeed,track)
                 .addLastElements(verticalRate,squawk,alert,spi,isOnGround);
-
     }
 
     private SBS1Message addLastElements(String verticalRate, String squawk, String alert, String spi, String isOnGround) {
