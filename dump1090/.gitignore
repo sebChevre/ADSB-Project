@@ -1,0 +1,34 @@
+# Created by .ignore support plugin (hsz.mobi)
+#target folder
+tcp-test-server/target
+
+#idea folder
+/.idea/
+
+#all iml and idea
+*.iml
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# Eclipse Core
+.project
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+#logs
+logs
+
+#src root project
+/src
