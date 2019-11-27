@@ -4,10 +4,15 @@ import ch.abbaye11.adsbservice.domaine.sbs1.Dump1090TrameUtil;
 import ch.abbaye11.adsbservice.domaine.sbs1.SBS1Message;
 import ch.abbaye11.adsbservice.domaine.sbs1.SBS1MessageType;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.mongodb.MongoClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -25,14 +30,21 @@ import org.springframework.integration.file.FileWritingMessageHandler;
 import org.springframework.integration.file.support.FileExistsMode;
 import org.springframework.integration.ip.tcp.TcpReceivingChannelAdapter;
 import org.springframework.integration.ip.tcp.connection.TcpNetClientConnectionFactory;
+import org.springframework.integration.kafka.outbound.KafkaProducerMessageHandler;
 import org.springframework.integration.mongodb.config.MongoDbInboundChannelAdapterParser;
 import org.springframework.integration.mongodb.outbound.MongoDbStoringMessageHandler;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.messaging.*;
 import org.springframework.messaging.handler.annotation.Header;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static ch.abbaye11.adsbservice.domaine.sbs1.SBS1MessageType.MSG;
@@ -49,10 +61,17 @@ public class TCPToSBS1Configuration {
     public static final String NON_MSG_CHANNEL_NAME = "nonMsgChannel";
     public static final String NON_MSG_JSON_CHANNEL_NAME = "nonMsgJsonChannel";
     private static final String MSG_JSON_CHANNEL_NAME = "msgJsonChannel";
-    private final String TCP_HOST = "localhost";//""Raspberrypi.local";
-    private final int TCP_PORT = 1234;//30003;
-
     private final static String TCP_OUT_CHANNEL_NAME = "sbs1RawChannel";
+
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @Value("${adsb.tcp.endpoint.host}")
+    private String tcpEndpointHost;
+
+    @Value("${adsb.tcp.endpoint.port}")
+    private Integer tcpEndpointport;
+
 
 
     @Autowired
@@ -130,6 +149,17 @@ public class TCPToSBS1Configuration {
             return NON_MSG_CHANNEL_NAME;
         }
     }
+
+    @Bean
+    @ServiceActivator(inputChannel = SBS_1_CHANNEL_NAME)
+    public MessageHandler kafkaMessageHandler() {
+        KafkaProducerMessageHandler handler = new KafkaProducerMessageHandler(kafkaTemplate());
+        handler.setTopicExpression(new LiteralExpression("test-adsb"));
+        handler.setMessageKeyExpression(new LiteralExpression("kafka-integration"));
+
+        return handler;
+    }
+
 
 
     @Transformer(inputChannel = NON_MSG_CHANNEL_NAME,outputChannel = NON_MSG_JSON_CHANNEL_NAME)
@@ -216,7 +246,7 @@ public class TCPToSBS1Configuration {
 
     @Bean
     public TcpNetClientConnectionFactory connectionFactory() {
-        return new TcpNetClientConnectionFactory(TCP_HOST,TCP_PORT);
+        return new TcpNetClientConnectionFactory(tcpEndpointHost,tcpEndpointport);
     }
 
     /**
@@ -291,5 +321,28 @@ public class TCPToSBS1Configuration {
     private final void logPayload(Object payload) throws JsonProcessingException {
         log.debug("[logBody] {}", objectMapper.writeValueAsString(payload));
     }
+
+    @Bean
+    public KafkaTemplate kafkaTemplate() {
+        return new KafkaTemplate(producerFactory());
+    }
+
+    @Bean
+    public ProducerFactory producerFactory() {
+        return new DefaultKafkaProducerFactory(producerConfigs());
+    }
+
+    @Bean
+    public Map producerConfigs() {
+        Map properties = new HashMap();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        // introduce a delay on the send to allow more messages to accumulate
+        properties.put(ProducerConfig.LINGER_MS_CONFIG, 1);
+
+        return properties;
+    }
+
 
 }

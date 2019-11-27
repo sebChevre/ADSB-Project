@@ -1,3 +1,12 @@
+adsb:
+    tcp:
+        endpoint:
+            host: localhost
+            port: 1234
+
 spring:
     profiles:
         active: file
+
+    kafka:
+        bootstrap-servers: localhost:9092
