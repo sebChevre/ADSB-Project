@@ -290,7 +290,6 @@ public class TCPToSBS1Configuration {
     @PostConstruct
     public void run() throws Exception {
 
-
         ((PublishSubscribeChannel)sbs1RawChannel()).subscribe(new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
@@ -304,10 +303,6 @@ public class TCPToSBS1Configuration {
                 log.info("[sbs1][client.handler] {}: ", message.getPayload());
             }
         });
-
-
-
-
 
     }
 
