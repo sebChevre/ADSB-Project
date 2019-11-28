@@ -55,6 +55,11 @@ public class ChannelsConfiguration {
     }
 
     @Bean
+    public MessageChannel sbs1RawOkChannel() {
+        return new PublishSubscribeChannel();
+    }
+
+    @Bean
     public MessageChannel sbs1Channel() {
         return new PublishSubscribeChannel();
     }
