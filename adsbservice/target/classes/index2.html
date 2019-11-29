@@ -17,6 +17,23 @@
             overflow: auto;
         }
 
+        .node-desc{
+            border-radius: 10px;
+
+            border: 2px solid cornflowerblue;
+            padding: 5px;
+            font-size: 11px;
+            font-family: Tahoma;
+        }
+        .node-name{
+          font-weight: bolder;
+        }
+
+        .node-count{
+            font-size: 18px;
+            color: red;
+            font-weight: bolder;
+        }
         .svg {
             display: inline-block;
             position: absolute;
@@ -46,7 +63,7 @@
     var colors = d3.scaleOrdinal(d3.schemeCategory10);
     var svg = d3.select("#graph").append("svg")
         .attr("class", "svg")
-        .attr("width", "100%").attr("height", "100%")
+        .attr("width", "90%").attr("height", "90%")
         .attr("pointer-events", "all");
 
     svg.append('defs')
@@ -56,18 +73,19 @@
             'refX':13,
             'refY':0,
             'orient':'auto',
-            'markerWidth':13,
-            'markerHeight':13,
+            'markerWidth':30,
+            'markerHeight':30,
             'xoverflow':'visible'})
         .append('svg:path')
+        .style("stroke-width", 1)
         .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
         .attr('fill', '#092283')
         .style('stroke','#000000');
 
     var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(function(d) { return d.nodeId; }).distance(100).strength(1))
-        .force("charge", d3.forceManyBody().strength(-1000))
-        .force("center", d3.forceCenter(width / 2, height / 2));
+        .force("link", d3.forceLink().id(function(d) { return d.nodeId; }).distance(450).strength(1))
+        .force("charge", d3.forceManyBody().strength(-500))
+         .force("center", d3.forceCenter(width / 2, height / 2));
 
     d3.json(graphEndpoint, function(error, graph) {
         if (error) throw error;
@@ -86,13 +104,16 @@
             .append("line")
             .attr("class", "link")
             .style('stroke','#000000')
+
+            //.style("stroke-width", 2)
             .attr('marker-end','url(#arrowhead)');
 
         link.text(function (d) {return d.type;});
 
         edgepaths = svg.selectAll(".edgepath")
             .data(links)
-            .enter()
+
+                .enter()
             .append('path')
             .attrs({
                 'class': 'edgepath',
@@ -118,6 +139,7 @@
             .attr('xlink:href', function (d, i) {return '#edgepath' + i})
             .style("text-anchor", "middle")
             .style("pointer-events", "none")
+            .style("font-size", "24px")
             .attr("startOffset", "50%")
             .text(function (d) {return d.type});
 
@@ -141,10 +163,37 @@
 
 
 
-        node.append("foreignobject")
-            .html("<div>ok</div>");
+        var nodeBox = node.append("foreignObject")
+            .attr("x", 10).attr("y", -20)
+             .attr("width", 420).attr("height", 200)
+            .append("xhtml:body")
+            .append("div")
+            .attr("class","node-desc");
 
-        node.append("text")
+        var nodeName = nodeBox.append("p")
+            .attr("class","node-name")
+            .text(function (d){
+                return  "nom: " + d.name;//":"+d.componentType
+            });
+
+        var nodeType = nodeBox.append("p")
+            .attr("class","node-type")
+            .text(function (d){
+                return  "type: " + d.componentType;//":"+d.componentType
+            });
+
+        var nodeCount = nodeBox.append("p")
+            .attr("class","node-count")
+            .text(function (d) {
+                var count = "";
+
+                if(d.stats != null){
+                    count = (d.stats.sendCount != null) ? d.stats.sendCount : d.stats.handleCount;
+                }
+
+                return count;
+            })
+        /**node.append("text")
             .attr("dy", -10)
             .html(function (d) {
 
@@ -156,7 +205,7 @@
 
                 return  d.name+":"+d.componentType + "" + "<br>" + count  ;
             });
-
+*/
         simulation
             .nodes(nodes)
             .on("tick", ticked);

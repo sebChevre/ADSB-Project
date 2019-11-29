@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizing your Spring Integration Components &amp; Flows</title>
+
+    <script type="text/javascript" src="http://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="http://d3js.org/d3-selection-multi.v1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.3/dagre-d3.js"></script>
+
+    <style>
+        body {
+            font: 300 14px 'Helvetica Neue', Helvetica;
+        }
+
+        .node {
+
+        }
+        .node rect {
+            stroke: #333;
+            fill: #fff;
+
+        }
+
+        .edgePath path {
+            stroke: #333;
+            fill: #333;
+            stroke-width: 1.5px;
+        }
+    </style>
+</head>
+
+<body>
+<svg width="3000" height="1000">
+    <g></g>
+</svg>
+
+<script>
+    // Create a new directed graph
+    var g = new dagreD3.graphlib.Graph().setGraph({});
+
+    var graphEndpoint = "http://localhost:8080/integration";
+
+    d3.json(graphEndpoint, function(error, graph) {
+        if (error) throw error;
+        updateGraph(graph.links, graph.nodes);
+    });
+
+    function updateGraph(links, nodes) {
+        //var nodes = [ "10007154_1100", "148570017_1100", "148570018_1100", "148570019_1100",
+        //    "148570025_1100", "148570010_1100", "148570021_1100", "148570020_1100",
+        //    "148570026_1100", "148570011_1100", "148570022_1100", "148570010_1200",               "148570020_1200", "148570026_1200", "148570023_1100", "148570011_1200",
+        //    "148570023_1200"
+        //];
+
+        // Automatically label each of the nodes
+        nodes.forEach(function(node) {
+            console.log(node)
+            g.setNode(node.nodeId, { label: node.name + ": " + node.nodeId + "<br>" + node.componentType });
+        });
+
+        links.forEach(function(link) {
+            g.setEdge(link.from,link.to, {label: link.type});
+        })
+
+        var svg = d3.select("svg"),
+            inner = svg.select("g");
+
+        // Set the rankdir
+        g.graph().rankdir = "LR";
+        g.graph().nodesep = 60;
+/**
+        // Set up zoom support
+        var zoom = d3.zoom().on("zoom", function() {
+           inner.attr("transform", "translate(" + d3.event.translate + ")" +
+               "scale(" + d3.event.scale + ")");
+        });
+        svg.call(zoom);
+*/
+        // Create the renderer
+        var render = new dagreD3.render();
+
+/**
+        console.log(g)
+        console.log(inner)
+ */
+        // Run the renderer. This is what draws the final graph.
+        render(inner, g);
+/**
+    .call(d3.zoom().on("zoom", function () {
+            svg.attr("transform", d3.event.transform)
+        }));
+*/
+        // Center the graph
+        var initialScale = 0.75;
+/**
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform,
+                d3.zoomIdentity
+                    .translate(svg.attr("width") - g.graph().width * initialScale) / 2, 20)
+                    .scale(initialScale))
+            )
+/**
+        d3.zoom().on("zoom", function () {
+            svg.attr("width") - g.graph().width * initialScale;
+            //svg.attr("transform", d3.event.transform)
+        })
+*/
+/**
+        zoom
+            .translate([(svg.attr("width") - g.graph().width * initialScale) / 2, 20])
+            .scale(initialScale)
+            .event(svg);
+        svg.attr('height', g.graph().height * initialScale + 340);
+ */
+    }
+
+
+</script>
+</body>
+
+</html>

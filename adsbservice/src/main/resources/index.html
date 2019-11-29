@@ -7,6 +7,7 @@
     <script type="text/javascript" src="http://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="http://d3js.org/d3-selection-multi.v1.min.js"></script>
 
+
     <style>
         #graph {
             display: inline-block;
@@ -64,10 +65,11 @@
         .attr('fill', '#092283')
         .style('stroke','#000000');
 
-    var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(function(d) { return d.nodeId; }).distance(100).strength(1))
-        .force("charge", d3.forceManyBody().strength(-1000))
-        .force("center", d3.forceCenter(width / 2, height / 2));
+ //   var simulation = d3.forceSimulation()
+ //       .force("link", d3.forceLink().id(function(d) { return d.nodeId; }).distance(100).strength(1))
+ //       .force("charge", d3.forceManyBody().strength(-1000))
+ //       .force("center", d3.forceCenter(width / 2, height / 2));
+
     d3.json(graphEndpoint, function(error, graph) {
         if (error) throw error;
         updateGraph(graph.links, graph.nodes);
@@ -100,6 +102,7 @@
                 'id': function (d, i) {return 'edgepath' + i}
             })
             .style("pointer-events", "none");
+
         edgelabels = svg.selectAll(".edgelabel")
             .data(links)
             .enter()
@@ -149,12 +152,12 @@
                 return  d.name+":"+d.componentType + "" + "<br>" + count  ;
             });
 
-        simulation
-            .nodes(nodes)
-            .on("tick", ticked);
+      //  simulation
+      //      .nodes(nodes)
+      //      .on("tick", ticked);
 
-        simulation.force("link")
-            .links(links);
+       // simulation.force("link")
+       //     .links(links);
     }
 
     function ticked() {
